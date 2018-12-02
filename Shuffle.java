@@ -1,109 +1,143 @@
 import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Shuffle{
 
     //Static Variables
-    static int counter = 0;
-    static int[] first;
-    static int[] second;
+    private static ArrayList<Deck> decks = new ArrayList<Deck>();
 
     public static void main(String []args)
     {
+        System.out.println("Creating the first deck:");
+        decks.add(new Deck());
+
+        menu();
+
+        System.out.println("Goodbye!");
+    }
+
+    private static void menu()
+    {
         Scanner sc = new Scanner(System.in);
-    
-        //Get size of deck
-        System.out.print("Enter the size of the deck:\t");
-        int size = sc.nextInt();
+        int choice=0;
+        while(choice != 5)
+        {
+            System.out.println("1) Create new deck:");
+            System.out.println("2) Print mapping for a deck:");
+            System.out.println("3) Print size of decks:");
+            System.out.println("4) Print mapping of all decks:");
+            System.out.println("5) Quit:");
+            try
+            {
+                choice = Integer.parseInt(sc.nextLine());
+            }
+            catch(Exception e)
+            {
+                System.out.println("Wrong input!");
+                choice = 5;
+            }
 
-        //Initialize size
-        int[] orig = init(size);
-        int[] ch = init(size);
-        if(size % 2 == 0)//Even
-        {
-            first = new int[size/2];
-            second = new int[size/2];
-        }else//Odd
-        {
-            first = new int[(size/2) + 1];
-            second = new int[size/2];
+            switch(choice)
+            {
+                case 1:
+                    decks.add(new Deck());
+                    break;
+                case 2:
+                    boolean inDecks = false;
+                    int location = 0;
+                    while(!inDecks)
+                    {
+                        System.out.println("These are your deck options:");
+                        for(int i=0; i < decks.size(); i++)
+                        {
+                            System.out.println(i+1 +") deck size: "+ decks.get(i).getSize());
+                        }
+                        System.out.println("Which one:\t");
+                        try
+                        {
+                            location = Integer.parseInt(sc.nextLine());
+                            decks.get(location -1).printMapping();
+                            inDecks = true;
+                        }
+                        catch(Exception e)
+                        {
+                            System.out.println("Chose outside of deck range");
+                        }
+                    }
+                    break;
+                case 3:
+                    System.out.println("Here are your decks and sizes:");
+                    for(int i=0; i < decks.size(); i++)
+                    {
+                        System.out.println(i+1 +") deck size: "+ decks.get(i).getSize());
+                    }
+                    break;
+                case 4:
+                    System.out.println("Showing mapping for each deck:");
+                    for(int i=0; i < decks.size(); i++)
+                    {
+                        System.out.println(i+1 +") deck:");
+                        decks.get(i).printMapping();
+                    }
+                    System.out.println();
+                    break;
+            }
         }
-        //Shuffle algorithm
-        shuffle(orig, ch);
-
-        System.out.println("\nCounter:\t"+ counter);
-
         sc.close();
     }
+}
 
-    private static int[] init(int size)
+class Deck
+{
+    private ArrayList<Integer> deck = new ArrayList<Integer>();
+    private int half, size;
+
+    public Deck()
     {
-        //Create array with size
-        int[] arr = new int[size];
-        
-        //Input numerical numbers
-        for(int i=0; i < arr.length; i++)
-        {
-            arr[i] = i;
-        }
-        
-        return arr;
+        Scanner sc = new Scanner(System.in);
+
+        //Get size of deck
+        System.out.print("Enter the size of the deck:\t");
+        size = sc.nextInt();
+        init(size);
+
+        half = deck.size()/2;
     }
-        
-    private static int shuffle(int[] orig, int[] change)
-    {
-        //Use to break recursion
-        boolean same = true;
 
-        //Fill first array
-        System.out.println("\nFIRST");
-        for(int i=0; i < first.length; i++)
+    private void init(int size)
+    {
+        //Input numerical numbers
+        for(int i=0; i < size; i++)
         {
-            System.out.print(change[i] +" ");
-            first[i] = change[i];
+            deck.add(i);
         }
-        //Fill second array
-        System.out.println("\nSECOND");
-        for(int i=0; i < second.length; i++)
+    }
+
+    public void printMapping()
+    {
+        int counter = 1;
+
+        System.out.println("Printing the mapping:");
+        System.out.println("----------------------------------------------------");
+        for(int i=0; i < deck.size(); i++)
         {
-            System.out.print(change[i + first.length] +" ");
-            second[i] = change[i + first.length];
-        }
-        //Refill change arr with new ordering
-        for(int i=0; i < change.length; i++)
-        {
-            if(i % 2 == 0)
+            if(i < half)
             {
-                change[i] = first[i/2];
+                System.out.printf("%2d  --->  %2d\n", i, i*2);
+            }else
+            {
+                System.out.printf("%2d  --->  %2d\n", i, counter);
+
+                //Isn't giving me the last mapping
+                // System.out.printf("%2d  --->  %2d\n", i, (i*2) % (size - 1));
+                counter+=2;
             }
         }
-        for(int i=0; i < change.length; i++)
-        {
-            if(i % 2 == 1)
-            {
-                change[i] = second[(i -1)/2];
-            }
-        }
-        //Check if any spots are different and print new ordering
-        System.out.println("\nDeck together");
-        for(int i=0; i < change.length; i++)
-        {
-            if(orig[i] != change[i])
-            {
-                same = false;
-            }
-            System.out.print(change[i] +" ");
-        }
-        counter++;
-        
-        //Break recursion
-        if(same && counter!=0)
-        {
-            return counter;
-        }else//Reshuffle
-        {
-            shuffle(orig, change);
-        }
-        
-        return -1;
+        System.out.println("----------------------------------------------------");
+    }
+
+    public int getSize()
+    {
+        return size;
     }
 }
